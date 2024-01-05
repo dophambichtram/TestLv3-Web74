@@ -5,32 +5,32 @@ config();
 
 // Replace the uri string with your connection string.
 const pass = process.env.PASS;
-const uri = `mongodb+srv://lightwing2208:${pass}@cluster0.uvhqfkq.mongodb.net/`;
+const uri = `mongodb+srv://bichtramdopham:${pass}@cluster0.6qh3ghx.mongodb.net/`;
 
 class DataBaseService {
   constructor() {
-     this.client = new MongoClient(uri);
-    this.db=this.client.db(process.env.DATANAME)
+    this.client = new MongoClient(uri);
+    this.db = this.client.db(process.env.DATANAME)
   }
-    run() {
+  run() {
     try {
-           this.client.connect();
-   
-        
-    } catch(error) {
-     
-      console.log("error",error);
+      this.client.connect();
+
+
+    } catch (error) {
+
+      console.log("error", error);
     }
   }
-   order(){
+  order() {
     return this.db.collection("Order");
   }
-  user(){
+  user() {
     return this.db.collection("User");
   }
-  inventory(){
+  inventory() {
     return this.db.collection("inventory");
   }
 }
 
-export const databaseUnit=new DataBaseService();
+export const databaseUnit = new DataBaseService();
