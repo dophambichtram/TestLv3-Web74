@@ -4,11 +4,256 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
+  <title>Task Manager</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f4f4f4;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 20px;
+      background-color: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    label {
+      margin-bottom: 5px;
+      color: #555;
+    }
+
+    input[type="text"],
+    input[type="date"] {
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+
+    button {
+      padding: 10px;
+      font-size: 16px;
+      background-color: #4caf50;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    .task-container {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    ul {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    input[type="checkbox"] {
+      margin-right: 10px;
+    }
+
+    p {
+      margin-top: 20px;
+      color: #888;
+    }
+
+    .language-switcher {
+      text-align: right;
+      margin-bottom: 20px;
+    }
+
+    select {
+      padding: 8px;
+    }
+  </style>
 </head>
 
 <body>
+  <h1>Task Manager</h1>
 
+  <form id="taskForm">
+    <label for="taskName">Task Name:</label>
+    <input type="text" id="taskName" required>
+    <label for="dueDate">Due Date:</label>
+    <input type="date" id="dueDate">
+
+    <button type="submit">Add Task</button>
+  </form>
+
+  <div class="language-switcher">
+    <label for="language">Language:</label>
+    <select id="language" onchange="changeLanguage()">
+      <option value="en">English</option>
+      <option value="vn">Vietnamese</option>
+      <!-- Add more language options as needed -->
+    </select>
+  </div>
+
+  <div class="task-container">
+    <input type="checkbox" id="notFinishedOnly" onchange="filterTasks()">
+    <label for="notFinishedOnly">Not finished only</label>
+
+    <ul id="taskList">
+      <!-- Task items will be dynamically added here -->
+    </ul>
+
+    <p id="undoneTasksCount"></p>
+  </div>
+
+  <script>
+
+    document.addEventListener('DOMContentLoaded', function () {
+      const taskForm = document.getElementById('taskForm');
+      const taskList = document.getElementById('taskList');
+
+      taskForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        const taskNameInput = document.getElementById('taskName');
+        const dueDateInput = document.getElementById('dueDate');
+
+        const taskName = taskNameInput.value;
+        const dueDate = dueDateInput.value;
+
+        // Validate and add the task to the list
+        if (taskName.trim() !== '' && dueDate.trim() !== '') {
+          addTask(taskName, dueDate);
+          taskForm.reset();
+        }
+      });
+
+      function addTask(taskName, dueDate) {
+        const li = document.createElement('li');
+        li.innerHTML = `
+               <input type="checkbox">
+               <span>${taskName}</span>
+               <span>${dueDate}</span>
+               <button onclick="removeTask(this)">Remove</button>
+           `;
+
+        taskList.appendChild(li);
+      }
+
+      function removeTask(button) {
+        const li = button.closest('li');
+        li.remove();
+      }
+    });
+
+    //2. **Lọc Tasks:**
+
+    function filterTasks() {
+      const notFinishedOnlyCheckbox = document.getElementById('notFinishedOnly');
+      const taskList = document.getElementById('taskList');
+      const tasks = taskList.getElementsByTagName('li');
+
+      for (const task of tasks) {
+        const checkbox = task.querySelector('input[type="checkbox"]');
+        const isFinished = checkbox.checked;
+
+        if (notFinishedOnlyCheckbox.checked && isFinished) {
+          task.style.display = 'none';
+        } else {
+          task.style.display = 'flex';
+        }
+      }
+    }
+
+    //3. **Đổi Ngôn Ngữ:**
+
+    function changeLanguage() {
+      const languageSelect = document.getElementById('language');
+      const selectedLanguage = languageSelect.value;
+
+      // Thực hiện logic để đổi ngôn ngữ dựa trên selectedLanguage
+      // Có thể liên quan đến việc cập nhật các phần tử UI với văn bản đã được dịch
+      console.log(`Ngôn ngữ đã chuyển sang: ${selectedLanguage} `);
+    }
+
+
+
+    //4. ** Đếm Số Task Chưa Hoàn Thành:**
+
+    document.addEventListener('DOMContentLoaded', function () {
+      const taskList = document.getElementById('taskList');
+      const undoneTasksCountParagraph = document.getElementById('undoneTasksCount');
+      const sortButton = document.getElementById('sortButton');
+
+      taskList.addEventListener('change', updateUndoneTasksCount);
+      sortButton.addEventListener('click', sortTasks);
+
+      function updateUndoneTasksCount() {
+        const tasks = taskList.querySelectorAll('input[type="checkbox"]');
+        let undoneTasksCount = 0;
+
+        tasks.forEach(task => {
+          if (!task.checked) {
+            undoneTasksCount++;
+          }
+        });
+
+        undoneTasksCountParagraph.textContent = `Số task chưa hoàn thành ${undoneTasksCount}`;
+      }
+
+      function sortTasks() {
+        const tasks = Array.from(taskList.querySelectorAll('li'));
+        const sortedTasks = tasks.sort(compareTasks);
+
+        taskList.innerHTML = '';
+        sortedTasks.forEach(task => {
+          taskList.appendChild(task);
+        });
+      }
+
+      function compareTasks(a, b) {
+        const taskA = a.querySelector('label').innerText.toLowerCase();
+        const taskB = b.querySelector('label').innerText.toLowerCase();
+
+        if (taskA < taskB) {
+          return -1;
+        }
+        if (taskA > taskB) {
+          return 1;
+        }
+        return 0;
+      }
+      document.addEventListener('DOMContentLoaded', function () {
+        const taskList = document.getElementById('taskList');
+        const undoneTasksCountParagraph = document.getElementById('undoneTasksCount');
+        const sortButton = document.getElementById('sortButton');
+
+        taskList.addEventListener('change', updateUndoneTasksCount);
+        sortButton.addEventListener('click', sortTasks);
+      });
+    })
+  </script>
 </body>
 
 </html>
