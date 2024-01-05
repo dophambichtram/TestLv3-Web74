@@ -1,84 +1,124 @@
+document.addEventListener('DOMContentLoaded', function () {
+  const taskForm = document.getElementById('taskForm');
+  const taskList = document.getElementById('taskList');
 
-let tasks = [];
+  taskForm.addEventListener('submit', function (event) {
+    event.preventDefault();
 
-// Function to add a new task
-function addTask(taskText, dueDate) {
-  const newTask = {
-    id: generateUniqueId(),
-    text: taskText,
-    status: "not finished",
-    dueDate: dueDate,
-  };
+    const taskNameInput = document.getElementById('taskName');
+    const dueDateInput = document.getElementById('dueDate');
 
-  tasks.push(newTask);
-  updateUI();
-  saveToLocalStorage();
-}
+    const taskName = taskNameInput.value;
+    const dueDate = dueDateInput.value;
 
-// Function to toggle task status
-function toggleTaskStatus(taskId) {
-  const taskIndex = tasks.findIndex(task => task.id === taskId);
-  tasks[taskIndex].status = tasks[taskIndex].status === "not finished" ? "done" : "not finished";
+    // Validate and add the task to the list
+    if (taskName.trim() !== '' && dueDate.trim() !== '') {
+      addTask(taskName, dueDate);
+      taskForm.reset();
+    }
+  });
 
-  updateUI();
-  saveToLocalStorage();
-}
+  function addTask(taskName, dueDate) {
+    const li = document.createElement('li');
+    li.innerHTML = `
+           <input type="checkbox">
+           <span>${taskName}</span>
+           <span>${dueDate}</span>
+           <button onclick="removeTask(this)">Remove</button>
+       `;
 
-// Function to filter and display tasks based on "Not finished only" checkbox
-function filterAndDisplayTasks() {
-  const showNotFinishedOnly = document.getElementById("notFinishedCheckbox").checked;
-  const filteredTasks = showNotFinishedOnly ? tasks.filter(task => task.status === "not finished") : tasks;
+    taskList.appendChild(li);
+  }
 
-  updateUI(filteredTasks);
-}
-
-// Function to save tasks to LocalStorage
-function saveToLocalStorage() {
-  localStorage.setItem("tasks", JSON.stringify(tasks));
-}
-
-// Function to load tasks from LocalStorage
-function loadFromLocalStorage() {
-  const storedTasks = JSON.parse(localStorage.getItem("tasks")) || [];
-  tasks = storedTasks;
-  updateUI();
-}
-
-// Function to generate a unique ID for tasks
-function generateUniqueId() {
-  return '_' + Math.random().toString(36).substr(2, 9);
-}
-
-// Event listener for form submission
-document.getElementById("taskForm").addEventListener("submit", function (e) {
-  e.preventDefault();
-  const taskText = document.getElementById("taskText").value;
-  const dueDate = document.getElementById("dueDate").value;
-  addTask(taskText, dueDate);
-  document.getElementById("taskText").value = "";
-  document.getElementById("dueDate").value = "";
+  function removeTask(button) {
+    const li = button.closest('li');
+    li.remove();
+  }
 });
 
-// Event listener for "Not finished only" checkbox
-document.getElementById("notFinishedCheckbox").addEventListener("change", filterAndDisplayTasks);
+//2. **Lọc Tasks:**
 
-// Load tasks from LocalStorage when the page is loaded
-window.addEventListener("load", loadFromLocalStorage);
+function filterTasks() {
+  const notFinishedOnlyCheckbox = document.getElementById('notFinishedOnly');
+  const taskList = document.getElementById('taskList');
+  const tasks = taskList.getElementsByTagName('li');
 
-//Function to update the UI
-function updateUI(tasksToShow = tasks) {
-  const taskListContainer = document.getElementById("taskList");
-  taskListContainer.innerHTML = "";
+  for (const task of tasks) {
+    const checkbox = task.querySelector('input[type="checkbox"]');
+    const isFinished = checkbox.checked;
 
-  tasksToShow.forEach(task => {
-    const listItem = document.createElement("li");
-    listItem.innerHTML = `
-        ${task.text}-Due Date: ${task.dueDate || "Not set"}
-        <input type = "checkbox"${task.status === "done" ? "checked" : ""} onchange="toggleTaskStatus('${task.id}')">
-        `;
-    taskListContainer.appendChild(listItem);
-  })
-  //Display the total number of undone tasks
-  const totalUndoneTasks = tasks.filter(task => task.status === "not finished").length;
-  document.title = `Task Manager(${totalUndoneTasks}task undone)`;
+    if (notFinishedOnlyCheckbox.checked && isFinished) {
+      task.style.display = 'none';
+    } else {
+      task.style.display = 'flex';
+    }
+  }
 }
+
+//3. **Đổi Ngôn Ngữ:**
+
+function changeLanguage() {
+  const languageSelect = document.getElementById('language');
+  const selectedLanguage = languageSelect.value;
+
+  // Thực hiện logic để đổi ngôn ngữ dựa trên selectedLanguage
+  // Có thể liên quan đến việc cập nhật các phần tử UI với văn bản đã được dịch
+  console.log(`Ngôn ngữ đã chuyển sang: ${selectedLanguage} `);
+}
+
+
+
+//4. ** Đếm Số Task Chưa Hoàn Thành:**
+
+document.addEventListener('DOMContentLoaded', function () {
+  const taskList = document.getElementById('taskList');
+  const undoneTasksCountParagraph = document.getElementById('undoneTasksCount');
+  const sortButton = document.getElementById('sortButton');
+
+  taskList.addEventListener('change', updateUndoneTasksCount);
+  sortButton.addEventListener('click', sortTasks);
+
+  function updateUndoneTasksCount() {
+    const tasks = taskList.querySelectorAll('input[type="checkbox"]');
+    let undoneTasksCount = 0;
+
+    tasks.forEach(task => {
+      if (!task.checked) {
+        undoneTasksCount++;
+      }
+    });
+
+    undoneTasksCountParagraph.textContent = `Số task chưa hoàn thành ${undoneTasksCount}`;
+  }
+
+  function sortTasks() {
+    const tasks = Array.from(taskList.querySelectorAll('li'));
+    const sortedTasks = tasks.sort(compareTasks);
+
+    taskList.innerHTML = '';
+    sortedTasks.forEach(task => {
+      taskList.appendChild(task);
+    });
+  }
+
+  function compareTasks(a, b) {
+    const taskA = a.querySelector('label').innerText.toLowerCase();
+    const taskB = b.querySelector('label').innerText.toLowerCase();
+
+    if (taskA < taskB) {
+      return -1;
+    }
+    if (taskA > taskB) {
+      return 1;
+    }
+    return 0;
+  }
+  document.addEventListener('DOMContentLoaded', function () {
+    const taskList = document.getElementById('taskList');
+    const undoneTasksCountParagraph = document.getElementById('undoneTasksCount');
+    const sortButton = document.getElementById('sortButton');
+
+    taskList.addEventListener('change', updateUndoneTasksCount);
+    sortButton.addEventListener('click', sortTasks);
+  });
+})
