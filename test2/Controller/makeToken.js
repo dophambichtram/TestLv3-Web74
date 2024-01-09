@@ -1,10 +1,9 @@
-import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-const privateKey="abcdef";
-export const   createTokenLogin =  (data,privateKey) =>  {
+const privateKey = "abcdef";
+export const createToken = (data, privateKey) => {
   console.log(data);
-  return  new  Promise((resolve, reject) => {
-     jwt.sign(
+  return new Promise((resolve, reject) => {
+    jwt.sign(
       { username: data.username, password: data.password },
       privateKey,
       { expiresIn: "1h" },
@@ -17,10 +16,10 @@ export const   createTokenLogin =  (data,privateKey) =>  {
     );
   });
 };
-export const createLoginAccess= async(req,res)=>{
-  
-  const encrypt = {username:req.body.username,password: req.body.password };
-  
-  const token=  await createTokenLogin(encrypt,privateKey);
-  return res.json({token});
+export const createAccess = async (req, res) => {
+
+  const infor = { username: req.body.username, password: req.body.password };
+
+  const token = await createToken(infor, privateKey);
+  return res.json({ token });
 }

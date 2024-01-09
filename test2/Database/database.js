@@ -33,4 +33,4 @@ class DataBaseService {
   }
 }
 
-export const databaseUnit = new DataBaseService();
+export const database = new DataBaseService();
